@@ -31,10 +31,18 @@ struct MyBehaviour {
     mdns: mdns::async_io::Behaviour,
 }
 
+fn validate_hex(s: &str) -> Result<String, String> {
+    if s.chars().all(|c| "0123456789abcdefABCDEF".contains(c)) {
+        Ok(s.to_lowercase().to_owned())
+    } else {
+        Err(String::from("Difficulty should be a valid hex string"))
+    }
+}
+
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    #[arg(short, long, default_value_t = String::from("00"))]
+    #[arg(value_parser = validate_hex, short, long, default_value_t = String::from("00"))]
     difficulty: String,
 }
 
@@ -42,17 +50,7 @@ struct Args {
 async fn main() -> Result<(), Box<dyn Error>> {
     // Argument with difficult of blocks
     let args = Args::parse();
-
-    let difficulty = match std::env::var("DIFFICULTY") {
-        Ok(val) => val,
-        Err(_) => args.difficulty.clone(),
-    };
-
-    let difficulty = difficulty.to_lowercase();
-    let valid_chars = "0123456789abcdef";
-    if !difficulty.chars().all(|c| valid_chars.contains(c)) {
-        panic!("Difficulty input contains invalid characters")
-    }
+    let difficulty = std::env::var("DIFFICULTY").unwrap_or_else(|_| args.difficulty.clone());
 
     // Enable logging
     pretty_env_logger::init();

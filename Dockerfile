@@ -14,9 +14,10 @@ WORKDIR /app
 
 COPY --from=build /app/target/release/main .
 
+ENV DIFFICULTY 00
+
 CMD ["./main"]
 
-ENV DIFFICULTY 00
 
 # docker build -t wooffie/rustychain:latest .
 # docker run -it -e RUST_LOG=info -e DIFFICULTY=bb wooffie/rustychain:latest
