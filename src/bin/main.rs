@@ -34,24 +34,25 @@ struct MyBehaviour {
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    #[arg(short, long, default_value_t = String::from("00"), value_parser = validate_hex)]
+    #[arg(short, long, default_value_t = String::from("00"))]
     difficulty: String,
-}
-
-fn validate_hex(s: &str) -> Result<String, String> {
-    let lowwered = s.to_lowercase();
-    let valid_chars = "0123456789abcdef";
-    if lowwered.chars().all(|c| valid_chars.contains(c)) {
-        Ok(lowwered.to_string())
-    } else {
-        Err(String::from("Input contains invalid characters"))
-    }
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // Argument with difficult of blocks
     let args = Args::parse();
+
+    let difficulty = match std::env::var("DIFFICULTY") {
+        Ok(val) => val,
+        Err(_) => args.difficulty.clone(),
+    };
+
+    let difficulty = difficulty.to_lowercase();
+    let valid_chars = "0123456789abcdef";
+    if !difficulty.chars().all(|c| valid_chars.contains(c)) {
+        panic!("Difficulty input contains invalid characters")
+    }
 
     // Enable logging
     pretty_env_logger::init();
@@ -120,7 +121,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let (tx_cancel, rx_cancel) = broadcast::channel(1);
 
     // Run task with blockchain node
-    let mut node = Node::new(Chain::new(), tx_node, rx_node, rx_cancel, args.difficulty);
+    let mut node = Node::new(Chain::new(), tx_node, rx_node, rx_cancel, difficulty);
     let _task = task::spawn(async move {
         node.run().await;
     });
