@@ -4,11 +4,18 @@ use serde::{Serialize, Deserialize};
 
 use crate::{Block, Chain};
 
+/// A message sent between nodes in the blockchain network.
+///
+/// Message can be sent NET<->NET or NODE<->NET
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Message {
+    /// A newly mined block that is ready to be added to the blockchain.
     MinedBlock(Block),
+    /// A new block received from another node that needs to be calculated and added to the blockchain.
     NewBlock(Block),
+    /// A request for the entire blockchain.
     ChainRequest,
+    /// A response to a `ChainRequest`, containing the current state of the blockchain.
     ChainResponce(Chain),
 }
 
