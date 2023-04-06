@@ -10,16 +10,35 @@ use tokio::{
 
 use crate::{Block, Chain, Message};
 
+/// Represents a node in the blockchain network.
 #[derive(Debug)]
 pub struct Node {
+    /// The blockchain maintained by this node.
     chain: Chain,
+    /// The sender used to send messages to other nodes in the network.
     tx: Sender<Message>,
+    /// The receiver used to receive messages from other nodes in the network.
     rx: Receiver<Message>,
+    /// The receiver used to make graceful shutdown of thread.
     rx_cancel: broadcast::Receiver<()>,
+    /// The difficulty level for mining blocks in the blockchain.
     difficult: String,
 }
 
 impl Node {
+    /// Constructs a new Node instance with the given chain, tx, rx, and difficult.
+    ///
+    /// # Arguments
+    ///
+    /// * chain - A `Chain` instance to be used by the Node.
+    /// * tx - A `Sender<Message>` instance to send messages to other nodes.
+    /// * rx - A `Receiver<Message>` instance to receive messages from other nodes.
+    /// * rx_cancel - A 'broadcast::Receiver<()>' intance to receive shutdown message.
+    /// * difficult - A String representing the difficulty of the mining process for the Node.
+    ///
+    /// # Returns
+    ///
+    /// A new Node instance with the given parameters.
     pub fn new(
         chain: Chain,
         tx: Sender<Message>,
@@ -36,6 +55,20 @@ impl Node {
         }
     }
 
+    /// Asynchronously runs the node, listening for incoming messages on the receive channel `self.rx`.
+    /// Messages received are processed based on their type, which can be one of the following:
+    ///
+    /// - `Message::NewBlock(block)`: Adds the new block to the node's chain queue.
+    ///
+    /// - `Message::ChainRequest`: Sends a chain response containing the node's current chain to the requesting node.
+    ///
+    /// - `Message::ChainResponse(chain)`: Compares the received chain with the current chain, replacing the current chain if the received chain is longer and contains no errors.
+    ///
+    /// - `Message::MinedBlock(block)`: Compares the received block with the node's current last block, replacing the last block with the received block if it has a higher block ID and passes validation. If the received block has the same block ID as the last block and the node is not currently mining, then the node takes the received block as its own.
+    ///
+    /// If the node is currently mining and the mining process is complete, the newly mined block is added to the node's chain queue and a new mining process is started.
+    ///
+    /// The `run` function never returns, but instead diverges into an infinite loop that continues to process incoming messages.
     pub async fn run(&mut self) {
         let (tx_node, rx) = mpsc::channel::<(Block, String)>(16);
         let (tx, mut rx_node) = mpsc::channel::<([u8; 32], u64)>(16);
@@ -180,6 +213,12 @@ impl Node {
     }
 }
 
+/// Mines the nonce for the given block and difficulty string using a Tokio task.
+///
+/// The function takes a receiving end of a channel, `rx`, which is used to receive a tuple of
+/// the block and the difficulty string. It also takes a sending end of a channel, `tx`, which is
+/// used to send back the resulting hash and nonce. Lastly, it takes a receiving end of a broadcast
+/// channel, `cancel_rx`, which is used to gracefully shutdown the function.
 pub async fn nonce_worker(
     mut rx: Receiver<(Block, String)>,
     tx: Sender<([u8; 32], u64)>,
