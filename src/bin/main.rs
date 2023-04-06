@@ -117,7 +117,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // IPC for node
     let (tx_net, rx_node) = mpsc::channel::<Message>(64);
     let (tx_node, mut rx_net) = mpsc::channel::<Message>(64);
-    let (_tx_cancel, rx_cancel) = broadcast::channel(1);
+    let (tx_cancel, rx_cancel) = broadcast::channel(1);
 
     // Run task with blockchain node
     let mut node = Node::new(Chain::new(), tx_node, rx_node, rx_cancel, args.difficulty);
@@ -139,6 +139,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     if let Err(e) = tx_net.send(Message::ChainRequest).await {
                         error!("Can't send data to host node: {e}");
                     }
+                }
+                if line == "exit" {
+                    tx_cancel.send(()).unwrap();
+                    break;
                 }
                 if line.starts_with("=") && line.len() > 1 {
                     line.remove(0);
@@ -218,4 +222,5 @@ async fn main() -> Result<(), Box<dyn Error>> {
             }
         }
     }
+    Ok(())
 }
