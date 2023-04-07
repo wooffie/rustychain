@@ -168,6 +168,12 @@ impl Chain {
     }
 }
 
+impl Default for Chain {
+    fn default() -> Self {
+        Chain::new()
+    }
+}
+
 impl fmt::Display for Chain {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match write!(f, "Status: {}\r\n", self.status) {
