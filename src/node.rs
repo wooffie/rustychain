@@ -187,10 +187,10 @@ impl Node {
             }
             }
 
-            if self.chain.status == true {
+            if self.chain.status {
                 self.chain.status = !self.chain.try_add();
 
-                if self.chain.status == false {
+                if !self.chain.status {
                     let last_block = self.chain.blocks.last().unwrap(); // we know!
                     let diff = self.difficult.clone();
                     if let Err(e) = tx_node.send((last_block.clone(), diff)).await {
