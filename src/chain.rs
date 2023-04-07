@@ -67,7 +67,7 @@ impl Chain {
             return None;
         }
         if !self.status {
-            len = len - 1;
+            len -= 1;
         }
         for i in 0..len {
             let block = self.blocks.get(i).expect("Must have block with this id");
