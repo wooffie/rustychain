@@ -67,7 +67,7 @@ impl Chain {
             return None;
         }
         if !self.status {
-            len = len - 1;
+            len -= 1;
         }
         for i in 0..len {
             let block = self.blocks.get(i).expect("Must have block with this id");
@@ -124,7 +124,7 @@ impl Chain {
             // ready
             if self.queue.is_empty() {
                 // check queue
-                return false;
+                false
             } else {
                 let mut block = self.queue.pop_front().unwrap();
                 let prev = match self.blocks.last() {
@@ -134,7 +134,7 @@ impl Chain {
                 block.prev = prev;
                 block.id = self.blocks.len() as u64;
                 self.blocks.push(block);
-                return true;
+                true
             }
         } else {
             false
@@ -165,6 +165,12 @@ impl Chain {
     pub fn add_queue(&mut self, mut block: Block) {
         block.id = (self.blocks.len() + self.queue.len()) as u64;
         self.queue.push_back(block);
+    }
+}
+
+impl Default for Chain {
+    fn default() -> Self {
+        Chain::new()
     }
 }
 

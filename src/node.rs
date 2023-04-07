@@ -121,12 +121,10 @@ impl Node {
                             match last {
                                 Some(last) => {
 
-                                    if block.id == last.id && self.chain.status && block.preequals(last) {
-                                        if block.hash < last.hash {
+                                    if block.id == last.id && self.chain.status && block.preequals(last) && block.hash < last.hash {
                                             last.hash = block.hash;
                                             last.nonce = block.nonce;
                                             info!("Replaced host block with remote block");
-                                        }
                                     }
 
                                     if block.id == last.id && !self.chain.status && block.preequals(last) {
@@ -142,9 +140,8 @@ impl Node {
                                         }
                                     }
 
-                                    match self.chain.have_errors() {
-                                        Some(id) => {
-                                            warn!("Host chain have erros! Requesting remote");
+                                    if let Some(id) = self.chain.have_errors() {
+                                        warn!("Host chain have erros! Requesting remote");
                                             for _ in id..self.chain.blocks.len(){
                                                 let block = self.chain.blocks.pop().unwrap();
                                                 self.chain.queue.push_front(block);
@@ -152,9 +149,6 @@ impl Node {
                                             if let Err(e) = self.tx.send(Message::ChainRequest).await{
                                                 error!("Chain request sending error: {:?}",e);
                                             }
-                                        },
-                                        None => {},
-
                                     }
                                 },
                                 None => {
@@ -171,37 +165,32 @@ impl Node {
                 }
             },
             nonce = rx_node.recv() => {
-                match nonce{
-                    Some(nonce) => {
+                if let Some(nonce) = nonce {
+                    if !self.chain.status {
+                        let mut cloned_block = self.chain.blocks.last().unwrap().clone();
+                        cloned_block.hash = nonce.0;
+                        cloned_block.nonce = nonce.1;
+                        if cloned_block.hash == cloned_block.calc_hash(){
+                            let mut last = self.chain.blocks.last_mut().unwrap();
+                            last.hash = cloned_block.hash;
+                            last.nonce = cloned_block.nonce;
+                            self.chain.status = true;
 
-                        if !self.chain.status {
-                            let mut cloned_block = self.chain.blocks.last().unwrap().clone();
-                            cloned_block.hash = nonce.0;
-                            cloned_block.nonce = nonce.1;
-                            if cloned_block.hash == cloned_block.calc_hash(){
-                                let mut last = self.chain.blocks.last_mut().unwrap();
-                                last.hash = cloned_block.hash;
-                                last.nonce = cloned_block.nonce;
-                                self.chain.status = true;
-
-                                if let Err(e) = self.tx.send(Message::MinedBlock(last.clone())).await{
-                                    error!("Sending error: {:?}",e)
-                                }
-                                info!("Mined!");
-
+                            if let Err(e) = self.tx.send(Message::MinedBlock(last.clone())).await{
+                                error!("Sending error: {:?}",e)
                             }
+                            info!("Mined!");
+
                         }
-                    },
-                    None => {
-                    },
+                    }
                 }
             }
             }
 
-            if self.chain.status == true {
+            if self.chain.status {
                 self.chain.status = !self.chain.try_add();
 
-                if self.chain.status == false {
+                if !self.chain.status {
                     let last_block = self.chain.blocks.last().unwrap(); // we know!
                     let diff = self.difficult.clone();
                     if let Err(e) = tx_node.send((last_block.clone(), diff)).await {
