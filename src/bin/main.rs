@@ -33,7 +33,7 @@ struct MyBehaviour {
 
 fn validate_hex(s: &str) -> Result<String, String> {
     if s.chars().all(|c| "0123456789abcdefABCDEF".contains(c)) {
-        Ok(s.to_lowercase().to_owned())
+        Ok(s.to_lowercase())
     } else {
         Err(String::from("Difficulty should be a valid hex string"))
     }
