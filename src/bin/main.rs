@@ -143,7 +143,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     tx_cancel.send(()).unwrap();
                     break;
                 }
-                if line.starts_with("=") && line.len() > 1 {
+                if line.starts_with('=') && line.len() > 1 {
                     line.remove(0);
 
 
