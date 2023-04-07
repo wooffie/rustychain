@@ -151,6 +151,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     let msg = Message::NewBlock(block);
                     let serded = serde_json::to_string(&msg).expect("Message is serializible");
 
+                    println!("[Host] {}",msg);
                     info!("[Host] {}",msg);
                     if let Err(e) = tx_net.send(msg).await {
                         error!("Can't send data to host node: {e}");
@@ -169,7 +170,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
                         if let Message::ChainResponce(chain) = msg.clone() {
                             if ls_flag {
-                                info!("Chain:\r\n + {}",chain);
+                                println!("Chain:\r\n + {}",chain);
                                 ls_flag = false;
                                 continue;
                             }
