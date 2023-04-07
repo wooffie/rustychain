@@ -121,12 +121,10 @@ impl Node {
                             match last {
                                 Some(last) => {
 
-                                    if block.id == last.id && self.chain.status && block.preequals(last) {
-                                        if block.hash < last.hash {
+                                    if block.id == last.id && self.chain.status && block.preequals(last) && block.hash < last.hash {
                                             last.hash = block.hash;
                                             last.nonce = block.nonce;
                                             info!("Replaced host block with remote block");
-                                        }
                                     }
 
                                     if block.id == last.id && !self.chain.status && block.preequals(last) {
