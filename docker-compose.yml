@@ -1,0 +1,13 @@
+version: '3'
+
+# docker compose up --scale rustychain=5
+services:
+  rustychain:
+    image: wooffie/rustychain:latest
+    restart: on-failure
+    tty: true
+    stdin_open: true
+    environment:
+      RUST_LOG: info
+      DIFFICULTY: "0000"
+    network_mode: host
