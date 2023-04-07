@@ -6,7 +6,9 @@
 
 Proof of Work блокчейн, разработанный в рамках дисциплин СПбПУ.
 
-![Thanks DALL-E for picture!](readme/rustychain.jpg)
+<p align="center">
+  <img src="readme/rustychain.jpg" alt="Thanks DALL-E for picture!" width="50%" />
+</p>
 
 ## Содержание
 
