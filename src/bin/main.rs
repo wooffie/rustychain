@@ -165,27 +165,23 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 }
             },
             msg = rx_net.recv().fuse() => {
-                match msg {
-                    Some(msg) => {
-
-                        if let Message::ChainResponce(chain) = msg.clone() {
-                            if ls_flag {
-                                println!("Chain:\r\n + {}",chain);
-                                ls_flag = false;
-                                continue;
-                            }
+                if let Some(msg) = msg {
+                    if let Message::ChainResponce(chain) = msg.clone() {
+                        if ls_flag {
+                            println!("Chain:\r\n + {}",chain);
+                            ls_flag = false;
+                            continue;
                         }
-                        info!("[Host] {}",msg);
+                    }
+                    info!("[Host] {}",msg);
 
-                        let serded = serde_json::to_string(&msg).expect("Message is serializible");
+                    let serded = serde_json::to_string(&msg).expect("Message is serializible");
 
-                        if let Err(e) = swarm
-                        .behaviour_mut().gossipsub
-                        .publish(topic.clone(), serded) {
-                        error!("Publish error around sending some data to other hosts: {e:?}");
-                 }
-                    },
-                    None => {}
+                    if let Err(e) = swarm
+                    .behaviour_mut().gossipsub
+                    .publish(topic.clone(), serded) {
+                    error!("Publish error around sending some data to other hosts: {e:?}");
+             }
                 }
             },
             event = swarm.select_next_some() => match event {
