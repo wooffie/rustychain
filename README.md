@@ -2,7 +2,7 @@
 
 | Tests | Lint | Dockerhub publish |
 | -------- | -------- | -------- |
-| [![Rust](https://github.com/wooffie/rustychain/actions/workflows/rust-tests.yml/badge.svg?branch=master)](https://github.com/wooffie/rustychain/actions/workflows/rust-tests.yml) | [![Rust lint analyze](https://github.com/wooffie/rustychain/actions/workflows/rust-lint.yml/badge.svg?branch=master)](https://github.com/wooffie/rustychain/actions/workflows/rust-lint.yml) | [![Docker](https://github.com/wooffie/rustychain/actions/workflows/docker-pulish.yml/badge.svg)](https://github.com/wooffie/rustychain/actions/workflows/docker-pulish.yml) |
+| [![Rust](https://github.com/wooffie/rustychain/actions/workflows/rust-tests.yml/badge.svg?branch=master)](https://github.com/wooffie/rustychain/actions/workflows/rust-tests.yml) | [![Rust lint analyze](https://github.com/wooffie/rustychain/actions/workflows/rust-lint.yml/badge.svg?branch=master)](https://github.com/wooffie/rustychain/actions/workflows/rust-lint.yml) | [![Docker](https://github.com/wooffie/rustychain/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/wooffie/rustychain/actions/workflows/docker-publish.yml) |
 
 Proof of Work блокчейн, разработанный в рамках дисциплин СПбПУ.
 
